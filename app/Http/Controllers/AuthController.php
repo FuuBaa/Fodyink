@@ -9,11 +9,10 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function register(Request $request){
-
         $fields = $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed|min:8'
+             'name' => 'required|string|max:100',
+             'email' => 'required|string|unique:users,email',
+             'password' => 'required|string|confirmed|min:6'
         ]);
 
         $user = User::create([
@@ -25,24 +24,21 @@ class AuthController extends Controller
         $token = $user->createToken('tokenku')->plainTextToken;
 
         $response = [
-            'user' => $user,
-            'token' => $token
+         'user' => $user,
+         'token' => $token
         ];
 
-        return response($response, 201);
+        return response ($response, 201);
     }
 
-    public function login(Request $request)
-    {
+    public function login(Request $request){
         $fields = $request->validate([
             'email' => 'required|string',
             'password' => 'required|string'
         ]);
 
-        //Check email
-        $user = User::where ('email', $fields['email'])->first();
+        $user = User::where('email', $fields['email'])->first();
 
-        //Check password
         if (!$user || !Hash::check($fields['password'], $user->password)){
             return response([
                 'message' => 'unauthorized'
@@ -64,7 +60,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return [
-            'message' => 'Berhasil logout, harap login kembali kalo mau😋'
+            'message' => 'Logged out'
         ];
     }
 }

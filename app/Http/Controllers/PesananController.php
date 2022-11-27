@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Pesanan;
 use App\Models\Makanan;
 use Illuminate\Http\Request;
 
-class MakananController extends Controller
+class PesananController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -13,11 +14,11 @@ class MakananController extends Controller
      */
     public function index()
     {
-        $makanan = Makanan::all();
-        return $makanan;
+        $pesanan = Pesanan::all();
+        return $pesanan;
     }
 
-        /**
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
@@ -35,12 +36,31 @@ class MakananController extends Controller
      */
     public function store(Request $request)
     {
-        $table =  Makanan::create($request->all());
+        $data_makanan = Makanan::where('id', $request->id_makanan)->first();
+        $total_harga = $request->jumlah*$data_makanan->harga;
 
-        return response()->json([
-            'status' => "Data sudah diinputkan",
-            "data" => $table
+        $data = Pesanan::create([
+            "id_makanan" => $request->id_makanan,
+            "id_pemesan" => $request->id_pemesan,
+            "jumlah" => $request->jumlah,
+            "total_harga" => $total_harga,
+            "alamat_pemesan" => $request->alamat_pemesan,
+            "status" => 'sedang diproses',
         ]);
+
+        if ($data) {
+            return response([
+                'status' => 201,
+                'message' => "data uploaded successfully",
+                'data' => $data
+            ]);
+        }else {
+            return response([
+                'status' => 400,
+                'message' => "data upload failed",
+                'data' => null
+            ]);
+        }
     }
 
     /**
@@ -51,12 +71,23 @@ class MakananController extends Controller
      */
     public function show($id)
     {
-        $makanan = makanan::find($id);
-        if ($makanan) {
+        $pesanan = pesanan::find($id);
+        if ($pesanan) {
             return response()->json([
-                'data' => $makanan
+                'data' => $pesanan
             ]);
         }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
     }
 
     /**
@@ -66,14 +97,15 @@ class MakananController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update_status (Request $request, $id)
     {
-        $makanan = makanan::find($id)->update($request->all());
-        if ($makanan){
+        $pesanan = pesanan::find($id)->update([
+            "status" => $request->status,
+        ]);
+        if ($pesanan){
             return response([
                 "status" => 200,
                 "message" => "Data berhasil diubah",
-                "data" => $makanan
             ]);
         }
         else{
@@ -92,12 +124,6 @@ class MakananController extends Controller
      */
     public function destroy($id)
     {
-        $makanan = makanan::where('id',$id)->first();
-        if($makanan){
-            $makanan->delete();
-            return response()->json([
-                "status" => "Data berhasil dihapus",
-            ]);
-        }
+        //
     }
 }
